@@ -315,6 +315,19 @@ class TestSimple(TestCase):
         expected = "SELECT * FROM a UNION SELECT * FROM b"
         self.assertEqual(result, expected)
 
+    def test_union2(self):
+        result = format({
+            'select': ['a'],
+            'from': {
+                'union': [
+                    {'select': '*', 'from': 'a'},
+                    {'select': '*', 'from': 'b'},
+                ],
+            }
+        })
+        expected = "SELECT a FROM (SELECT * FROM a UNION SELECT * FROM b)"
+        self.assertEqual(result, expected)
+
     def test_limit(self):
         result = format({'select': '*', 'from': 'a', 'limit': 10})
         expected = "SELECT * FROM a LIMIT 10"
@@ -405,14 +418,14 @@ class TestSimple(TestCase):
 
     def test_with_cte(self):
         expected = "WITH t AS (SELECT a FROM table) SELECT * FROM t"
-        result = format({'select': '*', 'from': 't', 'with': {'name': 
+        result = format({'select': '*', 'from': 't', 'with': {'name':
                          't', 'value': {'select': {'value': 'a'}, 'from': 'table'}}
                         })
         self.assertEqual(result, expected)
 
     def test_with_cte_various(self):
         expected = "WITH t1 AS (SELECT a FROM table), t2 AS (SELECT 1) SELECT * FROM t1, t2"
-        result = format({'select': '*', 'from': ['t1', 't2'], 
-                         'with': [{'name': 't1', 'value': {'select': {'value': 'a'}, 'from': 'table'}}, 
+        result = format({'select': '*', 'from': ['t1', 't2'],
+                         'with': [{'name': 't1', 'value': {'select': {'value': 'a'}, 'from': 'table'}},
                                   {'name': 't2', 'value': {'select': {'value': 1}}}]})
         self.assertEqual(result, expected)

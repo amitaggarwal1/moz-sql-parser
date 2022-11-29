@@ -319,7 +319,9 @@ class Formatter:
         if 'from' in json:
             from_ = json['from']
             if 'union' in from_:
-                return self.union(from_['union'])
+                return 'FROM ({0})'.format(self.union(from_['union']))
+            if 'union_all' in from_:
+                return 'FROM ({0})'.format(self.union_all(from_['union_all']))
             if not isinstance(from_, list):
                 from_ = [from_]
 
