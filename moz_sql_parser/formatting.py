@@ -208,6 +208,17 @@ class Formatter:
     def _binary_not(self, value):
         return '~{0}'.format(self.dispatch(value))
 
+    def _date(self, value):
+        if not value:
+            return 'DATE'
+        return 'DATE({0})'.format(self.dispatch(value))
+
+    def _cast(self, value):
+        acc = []
+        for v in value:
+            acc.append(self.dispatch(v))
+        return 'CAST({0})'.format(' AS '.join(acc))
+
     def _exists(self, value):
         return '{0} IS NOT NULL'.format(self.dispatch(value))
 
@@ -318,10 +329,17 @@ class Formatter:
         is_join = False
         if 'from' in json:
             from_ = json['from']
+            # As an artifact of parsing, sometimes with unions there is a
+            # from key in JSON without a select (see test_086). In those
+            # cases we don't want to have a FROM along with the union. The
+            # format_str logic below handles that.
+            format_str = '{0}'
+            if 'select' in json:
+                format_str = 'FROM ({0})'
             if 'union' in from_:
-                return 'FROM ({0})'.format(self.union(from_['union']))
+               return format_str.format(self.union(from_['union']))
             if 'union_all' in from_:
-                return 'FROM ({0})'.format(self.union_all(from_['union_all']))
+               return format_str.format(self.union_all(from_['union_all']))
             if not isinstance(from_, list):
                 from_ = [from_]
 

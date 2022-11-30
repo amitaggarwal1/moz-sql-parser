@@ -368,6 +368,13 @@ class TestSimple(TestCase):
         })
         self.assertEqual(result, expected)
 
+    def test_cast(self):
+        expected = "SELECT CAST('2001-08-16' AS DATE)"
+        result = format({
+            "select": [
+                {"cast": [{"literal": "2001-08-16"}, {"date": {}}]}]})
+        self.assertEqual(result, expected)
+
     def test_binary_or(self):
         expected = "SELECT * FROM t WHERE c | 4"
         result = format({
